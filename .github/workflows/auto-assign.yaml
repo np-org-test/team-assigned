@@ -1,0 +1,41 @@
+name: Auto Assign
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  contents: read
+  repository-projects: read
+
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-26.04
+    # env:
+      # GITHUB_TOKEN: ${{ secrets.PR_TOKEN }}
+
+    steps:
+      - name: "Auto assign"
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          # github-token: ${{ secrets.PR_TOKEN }}
+          script: |
+            console.log(context.payload.pull_request)
+            console.log(context.payload.pull_request.number)
+
+
+            const pull_number = context.payload.pull_request.number;
+
+            const [owner, repo] = context.payload.repository.full_name.split('/');
+
+            console.log(owner,repo,pull_number)
+
+            await octokit.rest.pulls.requestReviewers({
+                owner,
+                repo,
+                pull_number: pull_number,
+                team_reviewers: ["maintainer"]
+            });
